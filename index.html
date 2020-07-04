@@ -13,82 +13,59 @@
     <script src="booklet/jquery.booklet.latest.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.min.js"></script>
     <style>
-        .in {
-            width: 320px;
-            height: 350px;
+        .ss {
+            max-width: 100%;
+            max-height: 100%;
         }
     </style>
 </head>
 
-<body onload="addPages()">
+<body>
     <div id="mybook">
-        <div>
-            <canvas id="pdft" class="in">  </canvas>
-        </div>
-        <div>
-            <canvas id="pdft2" class="in">  </canvas>
-        </div>
-        <div>
-            <canvas id="pdft3" class="in">  </canvas>
-        </div>
     </div>
 
-  
+
 
     <script>
         $(function () {
-            //single book
-            $('#mybook').booklet();
+            pdfjsLib.getDocument('./Arch_of_Remembrance.pdf').then(doc => {
+                console.log(doc._pdfInfo.numPages);
 
-            
+                for (let i = 1; i <= doc._pdfInfo.numPages; i++) {
+                    document.getElementById('mybook').innerHTML += `<div>
+                            <canvas id="pdft${i}" class="ss"> </canvas>
+                        </div>`;
+
+                }
+
+                for (let i = 1; i <= doc._pdfInfo.numPages; i++) {
+                    doc.getPage(i).then(page => {
+                        let canvas = document.getElementById('pdft' + i);
+                        let context = canvas.getContext('2d');
+                        let vp = page.getViewport(1);
+
+                        canvas.width = vp.width;
+                        canvas.height = vp.height;
+
+                        page.render({
+                            canvasContext: context,
+                            viewport: vp
+                        });
+                    })
+                }
+            })
+
+            setTimeout(() => {
+                //single book
+                $('#mybook').booklet({
+                    width: '800px',
+                    height: '95%',
+                    startingPage: 1,
+                    pagePadding: 0,
+                    arrows: true,
+                });
+            }, 500)
         });
-
-        pdfjsLib.getDocument('./sample.pdf').then(doc => {
-            console.log(doc._pdfInfo.numPages);
-
-            doc.getPage(1).then(page => {
-                let canvas = document.getElementById('pdft');
-                let context = canvas.getContext('2d');
-                let vp = page.getViewport(1);
-
-                canvas.width = vp.width;
-                canvas.height = vp.height;
-
-                page.render({
-                    canvasContext: context,
-                    viewport: vp
-                });
-            })
-
-            doc.getPage(2).then(page => {
-                let canvas = document.getElementById('pdft2');
-                let context = canvas.getContext('2d');
-                let vp = page.getViewport(1);
-
-                canvas.width = vp.width;
-                canvas.height = vp.height;
-
-                page.render({
-                    canvasContext: context,
-                    viewport: vp
-                });
-            })
-
-            doc.getPage(3).then(page => {
-                let canvas = document.getElementById('pdft3');
-                let context = canvas.getContext('2d');
-                let vp = page.getViewport(1);
-
-                canvas.width = vp.width;
-                canvas.height = vp.height;
-
-                page.render({
-                    canvasContext: context,
-                    viewport: vp
-                });
-            })
-        })
-        
     </script>
 </body>
 
